@@ -8,7 +8,7 @@ kickstarter.lua is a search tool for kickstarter projects that runs from the lin
 LICENSE 
 ======= 
  
-castclient.lua is released under the GPLv3 and is copyright Colum Paget 2019
+kickstarter.lua is released under the GPLv3 and is copyright Colum Paget 2020
 
 
 

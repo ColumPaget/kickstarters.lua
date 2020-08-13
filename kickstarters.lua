@@ -39,7 +39,8 @@ function GetCategories()
 local S, toks, tok, str
 local categories={}
 
-S=stream.STREAM("https://www.kickstarter.com/discover/categories/games/ user-agent=links-2.7")
+--get any category page, and scrape list of categories out of html
+S=stream.STREAM("https://www.kickstarter.com/discover/categories/games/")
 if S == nil
 then
 	Out:puts("~rERROR:~0 failed to connect to kickstarter to get categories list\n");
@@ -199,6 +200,30 @@ end
 
 
 
+function Help()
+
+print("Usage:  lua kickstarters.lua  <options> [search term] [search term]..")
+print()
+print("Options:")
+print("-D                    enable debugging output")
+print("-debug                enable debugging output")
+print("-p <url>              use proxy")
+print("-proxy <url>          use proxy")
+print("-U <name>             set http user-agent")
+print("-user-agent <name>    set http user-agent")
+print("-c <category>         project category to search in")
+print("-cat-list             output a list of available project categories")
+print("-p <n>                output 'n' pages of results")
+print("-pages <n>            output 'n' pages of results")
+print("-?                    this help")
+print("-h                    this help")
+print("-help                 this help")
+print("--help                this help")
+print()
+print("Proxies:")
+print("Proxies are set using a proxy url like 'http://myproxy:1080'. 'socks5://user:password@localhost:8080' or 'sshtunnel://gateway'. Available proxy types are: http, https, socks4, socks5, and sshtunnel. a username and password can be supplied in the url. Sshtunnel proxies are just an ssh server that supports tunneling. The following environment variables can also be set to specifiy a proxy: SOCKS_PROXY, socks_proxy, HTTPS_PROXY, https_proxy, all_proxy, kickstarter_proxy")
+
+end
 
 
 
@@ -214,6 +239,7 @@ Settings.query_terms=""
 Settings.query_category=""
 Settings.query_location=""
 Settings.debug=false
+Settings.user_agent="kickstarters.lua"
 
 if strutil.strlen(Settings.proxy) == 0 then Proxy=process.getenv("SOCKS_PROXY") end
 if strutil.strlen(Settings.proxy) == 0 then Proxy=process.getenv("socks_proxy") end
@@ -225,9 +251,14 @@ if strutil.strlen(Settings.proxy) == 0 then Proxy=process.getenv("kickstarter_pr
 
 for i,arg in ipairs(args)
 do
-	if arg=="-pages" or arg=="-p"
+	if arg=="-debug" or arg=="-D" then Settings.debug=true
+	elseif arg=="-pages" or arg=="-p"
 	then
 		Settings.pages=tonumber(args[i+1])
+		args[i+1]=""
+	elseif arg=="-user-agent" or arg=="-U"
+	then
+		Settings.user_agent=args[i+1]
 		args[i+1]=""
 	elseif arg=="-proxy" or arg=="-P"
 	then
@@ -237,9 +268,12 @@ do
 	then 
 		Settings.query_category=args[i+1]
 		args[i+1]=""
-	elseif arg=="-cat-list" 
+	elseif arg=="-cat-list" or arg=="-list-categories" 
 	then
 		Settings.action="list categories"
+	elseif arg=="-?" or arg=="-h" or arg=="-help" or arg=="--help"
+	then
+		Settings.action="help"
 	else
 		Settings.query_terms=Settings.query_terms.." "..args[i]
 	end
@@ -300,8 +334,8 @@ Out=terminal.TERM()
 Settings=Configure(arg)
 
 -- you can set a proxy here
-if strutil.strlen(Settings.proxy) ==0 then net.setProxy(Settings.proxy) end
-
+if strutil.strlen(Settings.proxy) > 0 then net.setProxy(Settings.proxy) end
+if strutil.strlen(Settings.user_agent) > 0 then process.lu_set("HTTP:UserAgent", Settings.user_agent) end
 if Settings.debug==true then process.lu_set("HTTP:Debug","y") end
 
 categories=LoadCategories()
@@ -310,6 +344,9 @@ if #categories==0 then categories=GetCategories() end
 if Settings.action=="list categories"
 then
 	ListCategories()
+elseif Settings.action=="help"
+then
+	Help()
 else
 	KickStarterQuery(Settings)
 end
