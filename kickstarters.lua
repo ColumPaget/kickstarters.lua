@@ -10,7 +10,7 @@ projects={}
 
 
 function ParseListItem(categories, data)
-local toks, tok
+local toks, tok, P, str, id
 
 toks=strutil.TOKENIZER(data, "\\S", "Q")
 tok=toks:next()
@@ -241,12 +241,12 @@ Settings.query_location=""
 Settings.debug=false
 Settings.user_agent="kickstarters.lua"
 
-if strutil.strlen(Settings.proxy) == 0 then Proxy=process.getenv("SOCKS_PROXY") end
-if strutil.strlen(Settings.proxy) == 0 then Proxy=process.getenv("socks_proxy") end
-if strutil.strlen(Settings.proxy) == 0 then Proxy=process.getenv("HTTPS_PROXY") end
-if strutil.strlen(Settings.proxy) == 0 then Proxy=process.getenv("https_proxy") end
-if strutil.strlen(Settings.proxy) == 0 then Proxy=process.getenv("all_proxy") end
-if strutil.strlen(Settings.proxy) == 0 then Proxy=process.getenv("kickstarter_proxy") end
+if strutil.strlen(Settings.proxy) == 0 then Settings.proxy=process.getenv("SOCKS_PROXY") end
+if strutil.strlen(Settings.proxy) == 0 then Settings.proxy=process.getenv("socks_proxy") end
+if strutil.strlen(Settings.proxy) == 0 then Settings.proxy=process.getenv("HTTPS_PROXY") end
+if strutil.strlen(Settings.proxy) == 0 then Settings.proxy=process.getenv("https_proxy") end
+if strutil.strlen(Settings.proxy) == 0 then Settings.proxy=process.getenv("all_proxy") end
+if strutil.strlen(Settings.proxy) == 0 then Settings.proxy=process.getenv("kickstarter_proxy") end
 
 
 for i,arg in ipairs(args)
@@ -284,6 +284,7 @@ end
 
 
 function ListCategories()
+local cat, id
 
 for cat,id in pairs(categories)
 do
